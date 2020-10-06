@@ -29,6 +29,11 @@ jobs:
           echo "$(dirname $GITHUB_WORKSPACE)/bin" >> $GITHUB_PATH
         shell: bash
 
+      - name: Checkout the "master" branch
+        uses: actions/checkout@v2.3.3
+        with:
+          ref: master
+
       - name: Get and add proxy domains into temp-proxy.txt file
         run: |
           curl -sSL $GFWLIST_DOMAINS_URL | perl -ne '/^((?=^.{3,255})[a-zA-Z0-9][-_a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-_a-zA-Z0-9]{0,62})+)/ && print "$1\n"' > temp-proxy.txt
