@@ -47,12 +47,14 @@ jobs:
             domain=$(awk "NR==$n {print; exit}" temp-proxy1.txt)
             sed -i "/.*\.$domain$/d" temp-proxy.txt
           done
+          sed -i '/^$/d' temp-proxy.txt
 
       - name: Get and add reject domains into temp-reject.txt file
         run: |
           curl -sSL $REJECT_DOMAINS_URL > temp-reject.txt
           sed -i '/regex:/d' temp-reject.txt
           cat myrejectlist.txt >> temp-reject.txt
+          sed -i '/^$/d' temp-reject.txt
           sort -u temp-reject.txt -o temp-reject.txt
 
       - name: Generate proxylist.conf
