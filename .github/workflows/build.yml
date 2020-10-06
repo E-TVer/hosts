@@ -69,9 +69,9 @@ jobs:
       - name: Move and zip files and generate sha256 hash
         run: |
           mkdir -p ./publish/
-          install -p {proxy,block}list.txt ./publish/
+          install -p {proxy,block}list.conf ./publish/
           cd ./publish
-          zip rules.zip {proxy,block}list.txt
+          zip rules.zip {proxy,block}list.conf
           sha256sum blocklist.conf > blocklist.conf.sha256sum
           sha256sum proxylist.conf > proxylist.conf.sha256sum
           sha256sum rules.zip > rules.zip.sha256sum
