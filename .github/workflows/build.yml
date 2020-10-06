@@ -44,7 +44,7 @@ jobs:
           sed -i -e '/cdn-apple\.com$/d' -e '/^\(.*\.\)\?apple\.com$/d' -e '/\.cn$/d' temp-proxy.txt
           sed '/[a-zA-Z0-9-]\+\(\.[a-zA-Z0-9-]\+\)\{2,\}/d' temp-proxy.txt > temp-proxy1.txt
           for n in `seq $(sed -n '$=' temp-proxy1.txt)`; do
-            domain=$(tail -n+$n temp-proxy1.txt |head -1)
+            domain=$(awk "NR==$n {print; exit}" temp-proxy1.txt)
             sed -i "/.*\.$domain$/d" temp-proxy.txt
           done
 
