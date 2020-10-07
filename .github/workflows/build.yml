@@ -112,5 +112,5 @@ jobs:
           git checkout -b release
           git add .
           git commit -m "${{ env.RELEASE_NAME }}"
-          git remote add origin "https://${{ secrets.CODING_ACCOUNT }}:${{ CODING_PASSWORD }}@e.coding.net/${{ secrets.CODING_NAME }}/hosts.git"
+          git remote add origin "https://${{ secrets.CODING_ACCOUNT }}:${{ secrets.CODING_PASSWORD }}@e.coding.net/${{ secrets.CODING_NAME }}/hosts.git"
           git push -f -u origin release
