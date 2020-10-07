@@ -90,22 +90,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Git push assets to Coding "release" branch
-        run: |
-          cd publish
-          git init
-          git config --local user.name "${{ secrets.CODING_NAME }}"
-          git config --local user.email "${{ secrets.CODING_EMAIL }}"
-          git checkout -b release
-          git add .
-          git commit -m "${{ env.RELEASE_NAME }}"
-          git remote add origin "https://${{ secrets.CODING_ACCOUNT }}:${{ secrets.CODING_PASSWORD }}@e.coding.net/${{ secrets.CODING_NAME }}/hosts.git"
-          git push -f -u origin release
-
       - name: Git push assets to "release" branch
         run: |
           cd publish
-          rm -rf .git/
           git init
           git config --local user.name "actions"
           git config --local user.email "action@github.com"
@@ -113,4 +100,17 @@ jobs:
           git add .
           git commit -m "${{ env.RELEASE_NAME }}"
           git remote add origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          git push -f -u origin release
+
+      - name: Git push assets to Coding "release" branch
+        run: |
+          cd publish
+          rm -rf .git/
+          git init
+          git config --local user.name "${{ secrets.CODING_NAME }}"
+          git config --local user.email "${{ secrets.CODING_EMAIL }}"
+          git checkout -b release
+          git add .
+          git commit -m "${{ env.RELEASE_NAME }}"
+          git remote add origin "https://${{ secrets.CODING_ACCOUNT }}:${{ secrets.CODING_PASSWORD }}@e.coding.net/${{ secrets.CODING_NAME }}/hosts.git"
           git push -f -u origin release
