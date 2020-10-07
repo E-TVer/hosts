@@ -93,7 +93,6 @@ jobs:
       - name: Git push assets to "release" branch
         run: |
           cd publish
-          rm -rf .git/
           git init
           git config --local user.name "actions"
           git config --local user.email "action@github.com"
