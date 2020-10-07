@@ -1,7 +1,7 @@
 name: Build Smartdns rules files
 on:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "0 */12 * * *"
   push:
     branches:
       - master
@@ -73,10 +73,10 @@ jobs:
           mkdir -p ./publish/
           install -p {proxy,block}list.conf ./publish/
           cd ./publish
-          zip rules.zip {proxy,block}list.conf
+          #zip rules.zip {proxy,block}list.conf
           sha256sum blocklist.conf > blocklist.conf.sha256sum
           sha256sum proxylist.conf > proxylist.conf.sha256sum
-          sha256sum rules.zip > rules.zip.sha256sum
+          #sha256sum rules.zip > rules.zip.sha256sum
 
       - name: Release and upload assets
         uses: softprops/action-gh-release@v1
