@@ -1,12 +1,10 @@
 name: Build Smartdns rules files
 on:
   schedule:
-    - cron: "0 */12 * * *"
+    - cron: "0 20 * * *"
   push:
-    branches:
-      - master
-    paths-ignore:
-      - "**/README.md"
+    tags:
+      - "v*"
 jobs:
   build:
     name: Build
