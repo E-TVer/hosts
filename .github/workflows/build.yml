@@ -63,24 +63,20 @@ jobs:
 
       - name: Generate proxylist.conf
         run: |
-              echo "#Proxy List" > proxylist.conf
-              cat temp-proxy.txt | while read line; do
-                echo "domain-rules /$line/ -address #6 -nameserver foreign -ipset proxylist -speed-check-mode none" >> proxylist.conf
-              done
+          echo "#Proxy List" > proxylist.conf
+          cat temp-proxy.txt | while read line; do
+            echo "domain-rules /$line/ -address #6 -nameserver foreign -ipset proxylist -speed-check-mode none" >> ./old/proxylist.conf
+          done
 
       - name: Generate blocklist.conf
         run: |
-          sed -e 's!\(.*\)!address /\1/#!' -e "1i#Block List" temp-reject.txt > blocklist.conf
+          sed -e 's!\(.*\)!address /\1/#!' -e "1i#Block List" temp-reject.txt > ./old/blocklist.conf
 
       - name: Move and zip files and generate sha256 hash
         run: |
-          mkdir -p ./publish/
-          install -p {proxy,block}list.conf ./publish/
-          cd ./publish
-          #zip rules.zip {proxy,block}list.conf
+          cd ./old
           sha256sum blocklist.conf > blocklist.conf.sha256sum
           sha256sum proxylist.conf > proxylist.conf.sha256sum
-          #sha256sum rules.zip > rules.zip.sha256sum
 
       - name: Release and upload assets
         uses: softprops/action-gh-release@v1
@@ -91,13 +87,12 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            ./publish/*
+            ./old/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Git push assets to "release" branch
         run: |
-          cp -rf ./publish/* ./old/
           cd ./old
           sed -i '/url =/d' ./.git/config
           git config --local user.name "actions"
@@ -111,7 +106,7 @@ jobs:
       - name: Cleanup tags
         if: env.CLEAN_TAGS == 'true'
         run: |
-          cd publish
+          cd ./old
           sed -i '/coding.net/d' ./.git/config
           tagname="$(git ls-remote --tags origin |tail -n +6 |grep -o '[0-9]\{12\}$')"
           if [ -n "$tagname" ]; then
