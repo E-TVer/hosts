@@ -4,7 +4,6 @@ on:
     - cron: "0 20 * * *"
 env:
   PUSH_TO_RELEASE: false
-  CLEAN_TAGS: false
 jobs:
   build:
     name: Build
@@ -63,7 +62,7 @@ jobs:
 
       - name: Generate proxylist.conf
         run: |
-          echo "#Proxy List" > proxylist.conf
+          echo "#Proxy List" > ./old/proxylist.conf
           cat temp-proxy.txt | while read line; do
             echo "domain-rules /$line/ -address #6 -nameserver foreign -ipset proxylist -speed-check-mode none" >> ./old/proxylist.conf
           done
@@ -102,15 +101,3 @@ jobs:
           git remote set-url --add origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
           git remote set-url --add origin "https://${{ secrets.CODING_ACCOUNT }}:${{ secrets.CODING_PASSWORD }}@e.coding.net/${{ secrets.CODING_NAME }}/hosts.git"
           git push -u origin release
-
-      - name: Cleanup tags
-        if: env.CLEAN_TAGS == 'true'
-        run: |
-          cd ./old
-          sed -i '/coding.net/d' ./.git/config
-          tagname="$(git ls-remote --tags origin |tail -n +6 |grep -o '[0-9]\{12\}$')"
-          if [ -n "$tagname" ]; then
-            for t in $tagname ; do
-              git push origin :refs/tags/"$t"
-            done
-          fi
