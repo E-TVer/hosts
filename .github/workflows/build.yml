@@ -55,7 +55,7 @@ jobs:
       - name: Get and add reject domains into temp-reject.txt file
         run: |
           curl -sSL $REJECT_DOMAINS_URL > temp-reject.txt
-          sed -i '/regex:/d' temp-reject.txt
+          sed -i -e '/regex:/d' -e "/android.bugly.qq.com/d" temp-reject.txt
           cat myrejectlist.txt >> temp-reject.txt
           sed -i '/^$/d' temp-reject.txt
           sort -u temp-reject.txt -o temp-reject.txt
