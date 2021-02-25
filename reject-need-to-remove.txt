@@ -1,2 +1,3 @@
 android.bugly.qq.com
+gvt2.com
 mmstat.com
