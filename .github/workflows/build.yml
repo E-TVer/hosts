@@ -50,6 +50,8 @@ jobs:
             domain=$(awk "NR==$n {print; exit}" temp-proxy1.txt)
             sed -i "/.*\.$domain$/d" temp-proxy.txt
           done
+          mv -f temp-proxy.txt temp-proxy
+          diff ./proxy-need-to-remove.txt ./temp-proxy | awk '/^>/{print $2}' > temp-proxy.txt
           sed -i '/^$/d' temp-proxy.txt
 
       - name: Get and add reject domains into temp-reject.txt file
