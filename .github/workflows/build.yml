@@ -2,9 +2,9 @@ name: Build Smartdns rules files
 on:
   schedule:
     - cron: "0 20 * * *"
-  push:
-    branch:
-      - "master"
+#  push:
+#    branches:
+#      - "master"
 jobs:
   build:
     name: Build
