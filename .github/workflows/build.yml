@@ -2,9 +2,9 @@ name: Build Smartdns rules files
 on:
   schedule:
     - cron: "0 20 * * *"
-#  push:
-#    branches:
-#      - "master"
+  push:
+    branches:
+      - "master"
 jobs:
   build:
     name: Build
@@ -75,18 +75,14 @@ jobs:
           sed -e 's!\(.*\)!address /\1/#!' -e "1i#Block List" ../download/temp-reject.txt > ./blocklist.conf
 
       - name: Generate sha256 hash and diff
+        continue-on-error: true
         id: diffResult
         run: |
           cd ./new
           for i in $(ls *); do
             if [ -s $i ]; then
-              if ! [ -e ../$i ]; then
-                echo "新增$i"
-                cp -f $i ../$i
-                sha256sum $i > ../$i.sha256sum
-                echo "::set-output name=status::success"
-              elif diff -q $i ../$i; then
-                echo "更新$i"
+              sha256sum $i > $i.sha256sum
+              if ! sha256sum -c --status <(grep ../$i $i.sha256sum); then
                 cp -f $i ../$i
                 sha256sum $i > ../$i.sha256sum
                 echo "::set-output name=status::success"
