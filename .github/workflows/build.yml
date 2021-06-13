@@ -81,8 +81,8 @@ jobs:
           cd ./new
           for i in $(ls *); do
             if [ -s $i ]; then
-              sha256sum $i > $i.sha256sum
-              if ! sha256sum -c --status <(grep ../$i $i.sha256sum); then
+              fileSum=$(sha256sum $i |sed 's# .*##')
+              if ! echo "$fileSum ../$i"|sha256sum -c --status; then
                 cp -f $i ../$i
                 sha256sum $i > ../$i.sha256sum
                 echo "::set-output name=status::success"
