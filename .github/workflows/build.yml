@@ -2,8 +2,9 @@ name: Build Smartdns rules files
 on:
   schedule:
     - cron: "0 20 * * *"
-env:
-  PUSH_TO_RELEASE: false
+  push:
+    branch:
+      - "master"
 jobs:
   build:
     name: Build
@@ -31,18 +32,14 @@ jobs:
         with:
           ref: master
 
-      - name: Checkout the "release" branch
-        uses: actions/checkout@v2
-        with:
-          ref: release
-          path: old
-
       - name: Get and add proxy domains into temp-proxy.txt file
         run: |
+          mkdir -p ./download/
+          cd ./download
           curl -sSL $GFWLIST_DOMAINS_URL | perl -ne '/^((?=^.{3,255})[a-zA-Z0-9][-_a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-_a-zA-Z0-9]{0,62})+)/ && print "$1\n"' > temp-proxy.txt
           curl -sSL $GFWLIST_EXTRAS_DOMAINS_URL | perl -ne 'print if not /^(#|\s)/' >> temp-proxy.txt
           curl -sSL $GREATFIRE_DOMAINS_URL | perl -ne '/^((?=^.{3,255})[a-zA-Z0-9][-_a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-_a-zA-Z0-9]{0,62})+)/ && print "$1\n"' >> temp-proxy.txt
-          cat myproxylist.txt >> temp-proxy.txt
+          cat ../mod/myproxylist.txt >> temp-proxy.txt
           sort -u temp-proxy.txt -o temp-proxy.txt
           sed -i -e '/cdn-apple\.com$/d' -e '/^\(.*\.\)\?apple\.com$/d' -e '/\.cn$/d' -e '/^\(.*\.\)\?ntp\./d' temp-proxy.txt
           sed '/[a-zA-Z0-9-]\+\(\.[a-zA-Z0-9-]\+\)\{2,\}/d' temp-proxy.txt > temp-proxy1.txt
@@ -51,56 +48,56 @@ jobs:
             sed -i "/.*\.$domain$/d" temp-proxy.txt
           done
           mv -f temp-proxy.txt temp-proxy
-          diff ./proxy-need-to-remove.txt ./temp-proxy | awk '/^>/{print $2}' > temp-proxy.txt
+          diff ../mod/proxy-need-to-remove.txt ./temp-proxy | awk '/^>/{print $2}' > temp-proxy.txt
           sed -i '/^$/d' temp-proxy.txt
 
       - name: Get and add reject domains into temp-reject.txt file
         run: |
+          cd ./download
           curl -sSL $REJECT_DOMAINS_URL > temp-reject
-          diff ./reject-need-to-remove.txt ./temp-reject | awk '/^>/{print $2}' > temp-reject.txt
-          cat reject-need-to-add.txt >> temp-reject.txt
+          diff ../mod/reject-need-to-remove.txt ./temp-reject | awk '/^>/{print $2}' > temp-reject.txt
+          cat ../mod/reject-need-to-add.txt >> temp-reject.txt
           sed -i -e '/regex:/d' -e '/^$/d' temp-reject.txt
           sort -u temp-reject.txt -o temp-reject.txt
 
       - name: Generate proxylist.conf
         run: |
-          echo "#Proxy List" > ./old/proxylist.conf
-          cat temp-proxy.txt | while read line; do
-            echo "domain-rules /$line/ -address #6 -nameserver foreign -ipset proxylist -speed-check-mode none" >> ./old/proxylist.conf
+          mkdir -p ./new/
+          cd ./new
+          echo "#Proxy List" > ./proxylist.conf
+          cat ../download/temp-proxy.txt | while read line; do
+            echo "domain-rules /$line/ -address #6 -nameserver foreign -ipset proxylist -speed-check-mode none" >> ./proxylist.conf
           done
 
       - name: Generate blocklist.conf
         run: |
-          sed -e 's!\(.*\)!address /\1/#!' -e "1i#Block List" temp-reject.txt > ./old/blocklist.conf
+          cd ./new
+          sed -e 's!\(.*\)!address /\1/#!' -e "1i#Block List" ../download/temp-reject.txt > ./blocklist.conf
 
-      - name: Move and zip files and generate sha256 hash
+      - name: Generate sha256 hash and diff
+        id: diffResult
         run: |
-          cd ./old
-          sha256sum blocklist.conf > blocklist.conf.sha256sum
-          sha256sum proxylist.conf > proxylist.conf.sha256sum
+          cd ./new
+          for i in $(ls *); do
+            if [ -s $i ]; then
+              if diff -q $i ../$i; then
+                cp -f $i ../$i
+                sha256sum $i > ../$i.sha256sum
+                echo "::set-output name=status::success"
+              fi
+            fi
+          done
 
-      - name: Release and upload assets
-        uses: softprops/action-gh-release@v1
-        if: env.PUSH_TO_RELEASE == 'true'
-        with:
-          name: ${{ env.RELEASE_NAME }}
-          tag_name: ${{ env.TAG_NAME }}
-          draft: false
-          prerelease: false
-          files: |
-            ./old/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Git push assets to "release" branch
+      - name: Git push assets to "master" branch
         run: |
-          cd ./old
+          rm -rf download new
           sed -i '/url =/d' ./.git/config
           git config --local user.name "actions"
           git config --local user.email "action@github.com"
-          git add .
+          git add --all
           git commit -m "${{ env.RELEASE_NAME }}"
           git remote set-url --add origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
           git remote set-url --add origin "https://${{ secrets.GITEE_ACCOUNT }}:${{ secrets.GITEE_PASSWORD }}@gitee.com/${{ secrets.GITEE_NAME }}/hosts.git"
           git remote set-url --add origin "https://${{ secrets.CODING_ACCOUNT }}:${{ secrets.CODING_PASSWORD }}@e.coding.net/${{ secrets.CODING_NAME }}/hosts.git"
-          git push -u origin release
+          git fetch --unshallow origin
+          git push -u origin master
