@@ -69,7 +69,7 @@ jobs:
           curl -sSL $APPLE_CN_DOMAINS_URL >> temp-bypass
           sed -i 's#.*/\(.*\)/.*#\1#' temp-bypass
           cat ./temp-bypass ../mod/bypass-need-to-add.txt > temp-bypass.txt
-          sed -i /^$/d' temp-bypass.txt
+          sed -i '/^$/d' temp-bypass.txt
           sort -u temp-bypass.txt -o temp-bypass.txt
 
       - name: Generate proxylist.conf
