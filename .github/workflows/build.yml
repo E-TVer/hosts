@@ -1,7 +1,7 @@
 name: Build Smartdns rules files
 on:
   schedule:
-    - cron: "0 20 * * *"
+    - cron: "0 */8 * * *"
   push:
     branches:
       - "master"
@@ -22,8 +22,8 @@ jobs:
           echo "GFWLIST_DOMAINS_URL=https://cokebar.github.io/gfwlist2dnsmasq/gfwlist_domain.txt" >> $GITHUB_ENV
           echo "GFWLIST_EXTRAS_DOMAINS_URL=https://raw.githubusercontent.com/pexcn/gfwlist-extras/master/gfwlist-extras.txt" >> $GITHUB_ENV
           echo "GREATFIRE_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/cn-blocked-domain/release/domains.txt" >> $GITHUB_ENV
-          echo "GOOGLE_CN_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/google-cn.txt" >> $GITHUB_ENV
-          echo "APPLE_CN_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/apple-cn.txt" >> $GITHUB_ENV
+          echo "GOOGLE_CN_DOMAINS_URL=https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/master/google.china.conf" >> $GITHUB_ENV
+          echo "APPLE_CN_DOMAINS_URL=https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/master/apple.china.conf" >> $GITHUB_ENV
           echo "REJECT_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/reject-list.txt" >> $GITHUB_ENV
           echo "GOPATH=$(dirname $GITHUB_WORKSPACE)" >> $GITHUB_ENV
           echo "$(dirname $GITHUB_WORKSPACE)/bin" >> $GITHUB_PATH
@@ -67,9 +67,9 @@ jobs:
           cd ./download
           curl -sSL $GOOGLE_CN_DOMAINS_URL > temp-bypass
           curl -sSL $APPLE_CN_DOMAINS_URL >> temp-bypass
-          sed -i 's#^.*:##' temp-bypass
-          cat ../mod/bypass-need-to-add.txt ./temp-bypass > temp-bypass.txt
-          sed -i -e '/regex:/d' -e '/^$/d' temp-bypass.txt
+          sed -i 's#.*/\(.*\)/.*#\1#' temp-bypass
+          cat ./temp-bypass ../mod/bypass-need-to-add.txt > temp-bypass.txt
+          sed -i /^$/d' temp-bypass.txt
           sort -u temp-bypass.txt -o temp-bypass.txt
 
       - name: Generate proxylist.conf
