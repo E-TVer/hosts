@@ -1,4 +1,1 @@
-beacons2.gvt2.com
-g1.gstatic.com
-g2.gstatic.com
-gstaticadssl.l.google.com
+
