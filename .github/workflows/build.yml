@@ -41,7 +41,7 @@ jobs:
           curl -sSL $GFWLIST_DOMAINS_URL | perl -ne '/^((?=^.{3,255})[a-zA-Z0-9][-_a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-_a-zA-Z0-9]{0,62})+)/ && print "$1\n"' > temp-proxy.txt
           curl -sSL $GFWLIST_EXTRAS_DOMAINS_URL | perl -ne 'print if not /^(#|\s)/' >> temp-proxy.txt
           curl -sSL $GREATFIRE_DOMAINS_URL | perl -ne '/^((?=^.{3,255})[a-zA-Z0-9][-_a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-_a-zA-Z0-9]{0,62})+)/ && print "$1\n"' >> temp-proxy.txt
-          cat ../mod/myproxylist.txt >> temp-proxy.txt
+          cat ../mod/proxy-need-to-add.txt >> temp-proxy.txt
           sort -u temp-proxy.txt -o temp-proxy.txt
           sed -i -e '/cdn-apple\.com$/d' -e '/^\(.*\.\)\?apple\.com$/d' -e '/\.cn$/d' -e '/^\(.*\.\)\?ntp\./d' temp-proxy.txt
           sed '/[a-zA-Z0-9-]\+\(\.[a-zA-Z0-9-]\+\)\{2,\}/d' temp-proxy.txt > temp-proxy1.txt
