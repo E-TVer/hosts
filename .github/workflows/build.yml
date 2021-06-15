@@ -2,9 +2,9 @@ name: Build Smartdns rules files
 on:
   schedule:
     - cron: "0 */8 * * *"
-  push:
-    branches:
-      - "master"
+#  push:
+#    branches:
+#      - "master"
 jobs:
   build:
     name: Build
@@ -91,7 +91,7 @@ jobs:
           cd ./new
           echo "#Bypass List" > ./bypasslist.conf
           cat ../download/temp-bypass.txt | while read line; do
-            echo "domain-rules /$line/ -nameserver foreignUnban -ipset -" >> ./bypasslist.conf
+            echo "domain-rules /$line/ -nameserver chn -ipset -" >> ./bypasslist.conf
           done
 
       - name: Generate sha256 hash and diff
